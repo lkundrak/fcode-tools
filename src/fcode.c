@@ -45,6 +45,8 @@
 ssize_t fcode_read(uint8_t **fcodep, int fd) {
     uint8_t *fcode;
     uint32_t fcode_size, total_size, i = 0;
+    uint16_t pcir;
+    ssize_t tr;
     ssize_t n;
 
     /*
@@ -68,22 +70,75 @@ ssize_t fcode_read(uint8_t **fcodep, int fd) {
     };
 
     if (fcode[i+0x00] == 0x55 && fcode[i+0x01] == 0xaa) {
-        fcode = realloc(fcode, PCI_HEADER_SIZE+FCODE_HEADER_SIZE);
+        fcode = realloc(fcode, PCIR_PTR_OFFSET+PCIR_PTR_LEN);
         if (!fcode) {
             perror("fcode_read()");
             return -1;
         };
 
-        n = read(fd, &fcode[FCODE_HEADER_SIZE], PCI_HEADER_SIZE);
+        tr = PCIR_PTR_OFFSET+PCIR_PTR_LEN-FCODE_HEADER_SIZE;
+        n = read(fd, &fcode[FCODE_HEADER_SIZE], tr);
         if (-1 == n) {
             perror("fcode_read()");
             return -1;
-        } else if (n < PCI_HEADER_SIZE) {
+        } else if (n < tr) {
             fprintf(stderr, "fcode_read(): Short read\n");
             return -1;
         };
 
-        i = PCI_HEADER_SIZE;
+        pcir = fcode[PCIR_PTR_OFFSET+1]<<8|fcode[PCIR_PTR_OFFSET];
+        if (pcir < PCIR_PTR_OFFSET+PCIR_PTR_LEN) {
+            fprintf(stderr, "fcode_read(): Bad PCIR offset\n");
+            return -1;
+        }
+
+        fcode = realloc(fcode, pcir+PCIR_HEADER_SIZE);
+        if (!fcode) {
+            perror("fcode_read()");
+            return -1;
+        };
+
+        tr = pcir+PCIR_HEADER_SIZE;
+        tr -= PCIR_PTR_OFFSET+PCIR_PTR_LEN;
+        n = read(fd, &fcode[PCIR_PTR_OFFSET+PCIR_PTR_LEN], tr);
+        if (-1 == n) {
+            perror("fcode_read()");
+            return -1;
+        } else if (n < tr) {
+            fprintf(stderr, "fcode_read(): Short read\n");
+            return -1;
+        };
+
+        if (fcode[pcir+0] != 'P' || fcode[pcir+1] != 'C'
+            || fcode[pcir+2] != 'I' || fcode[pcir+3] != 'R') {
+            fprintf(stderr, "fcode_read(): Bad PCIR magic\n");
+            return -1;
+        }
+
+        tr = fcode[pcir+11]<<8|fcode[pcir+10];
+        if (tr < PCIR_HEADER_SIZE) {
+            fprintf(stderr, "fcode_read(): Bad PCIR size\n");
+            return -1;
+        }
+
+        fcode = realloc(fcode, pcir+tr+FCODE_HEADER_SIZE);
+        if (!fcode) {
+            perror("fcode_read()");
+            return -1;
+        };
+
+        tr += FCODE_HEADER_SIZE;
+        tr -= PCIR_HEADER_SIZE;
+        n = read(fd, &fcode[pcir+PCIR_HEADER_SIZE], tr);
+        if (-1 == n) {
+            perror("fcode_read()");
+            return -1;
+        } else if (n < tr) {
+            fprintf(stderr, "fcode_read(): Short read\n");
+            return -1;
+        };
+
+        i = pcir+PCIR_HEADER_SIZE+tr-FCODE_HEADER_SIZE;
     };
 
     /* There should now be an FCode header at fcode[i]. */

@@ -72,17 +72,19 @@ ast_t *detokenize(uint8_t *fcode) {
 
 
     if (fcode[0x00] == 0x55 && fcode[0x01] == 0xaa) {
+        i = fcode[PCIR_PTR_OFFSET+1]<<8|fcode[PCIR_PTR_OFFSET];
+
         /* Note that PCI byte order is little endian! */
         ast_insert(&Tp, AST_BM_DEFAULT, AST_PCI_HEADER,
-            fcode[0x20]|fcode[0x21]<<8,                 /* vendor-id */
-            fcode[0x22]|fcode[0x23]<<8,                 /* device-id */
-            fcode[0x29]|fcode[0x2a]<<8|fcode[0x2b]<<16, /* class-code */
-            fcode[0x24]|fcode[0x25]<<8,                 /* vendor-prod-data */
-            fcode[0x2e]|fcode[0x2f]<<8,                 /* code-rev */
-            fcode[0x2c]|fcode[0x2d]<<8                  /* size */
+            fcode[i+4]|fcode[i+5]<<8,                   /* vendor-id */
+            fcode[i+6]|fcode[i+7]<<8,                   /* device-id */
+            fcode[i+13]|fcode[i+14]<<8|fcode[i+15]<<16, /* class-code */
+            fcode[i+8]|fcode[i+9]<<8,                   /* vendor-prod-data */
+            fcode[i+18]|fcode[i+19]<<8,                 /* code-rev */
+            fcode[i+16]|fcode[i+17]<<8                  /* size */
             );
 
-        i = PCI_HEADER_SIZE;
+        i += fcode[i+10]|fcode[i+11]<<8;
     };
 
 

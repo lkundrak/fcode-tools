@@ -35,8 +35,10 @@
 
 #include <inttypes.h>
 
+#define PCIR_PTR_OFFSET     24
+#define PCIR_PTR_LEN        2
+#define PCIR_HEADER_SIZE    24
 
-#define PCI_HEADER_SIZE     (28+24)
 #define FCODE_HEADER_SIZE   8
 
 
