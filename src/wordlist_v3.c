@@ -250,10 +250,10 @@ char *wordlist_v3[MAX_BUILTIN_WORDS] = {
 /* d3 */    ",",                        /* ( n -- ) */
 /* d4 */    "um*",                      /* ( u1_32 u2_32 -- product_64 ) */
 /* d5 */    "um/mod",                   /* ( u1_64 u2_32 -- remainder_32 quot_32 ) */
-/* d6 */    "d+",                       /* ( x1 x2 -- x3 ) */
-/* d7 */    "d-",                       /* ( x1 x2 -- x3 ) */
-/* d8 */    NULL,
-/* d9 */    NULL,
+/* d6 */    NULL,
+/* d7 */    NULL,
+/* d8 */    "d+",                       /* ( x1 x2 -- x3 ) */
+/* d9 */    "d-",                       /* ( x1 x2 -- x3 ) */
 /* da */    "get-token",                /* XXX */
 /* db */    "set-token",                /* XXX */
 /* dc */    "state",                    /* XXX */
