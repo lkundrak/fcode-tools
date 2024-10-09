@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
 
     cmd = basename(argv[0]);
 
-    while ( (c = getopt(argc, argv, "hv")) != -1 ) {
+    while ( (c = getopt(argc, argv, "+hv")) != -1 ) {
         switch (c) {
         case 'v':
             fprintf(stderr,
@@ -92,7 +92,7 @@ int main(int argc, char **argv) {
 
         optind++;
 
-        while ( (c = getopt(argc, argv, "23o:")) != -1 ) {
+        while ( (c = getopt(argc, argv, "+23o:")) != -1 ) {
             switch (c) {
             case '2':
                 fcode_version = 2;
@@ -133,7 +133,7 @@ int main(int argc, char **argv) {
 
         optind++;
 
-        while ( (c = getopt(argc, argv, "o:")) != -1 ) {
+        while ( (c = getopt(argc, argv, "+o:")) != -1 ) {
             switch (c) {
             case 'o':
                 output = optarg;
